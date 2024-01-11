@@ -1,0 +1,56 @@
+Code - OSS
+Electron
+Raspberry Pi
+Sirus Launcher
+Vieb/Cache/Cache_Data
+Vieb/Code Cache
+Vieb/Crashpad
+Vieb/DawnCache
+Vieb/Dictionaries
+Vieb/GPUCache
+Vieb/Local Storage/leveldb
+Vieb/Partitions/main
+Vieb/Session Storage
+Vieb/Shared Dictionary
+Vieb/blocklists
+Vieb/favicons
+Vieb/Cookies
+Vieb/Cookies-journal
+Vieb/Network Persistent State
+Vieb/Preferences
+Vieb/SharedStorage
+Vieb/SingletonCookie
+Vieb/SingletonLock
+Vieb/SingletonSocket
+Vieb/TransportSecurity
+Vieb/Trust Tokens
+Vieb/Trust Tokens-journal
+Vieb/commandhist
+Vieb/dls
+Vieb/explorehist
+Vieb/hist
+Vieb/quickmarks
+Vieb/recordings
+Vieb/tabs
+Vieb/webviewsettings
+Vieb/windowstate
+blender/4.0
+dconf
+fish/completions
+fish/conf.d
+fish/functions
+fish/fish_variables
+google-chrome
+google-chrome-for-testing/Crash Reports
+htop
+pypoetry
+python_keyring
+session
+systemd/user
+tmux/plugins
+tmux/plugins
+transmission
+whoozle.github.io
+wpaperd
+xfce4/xfconf/xfce-perchannel-xml
+xsettingsd

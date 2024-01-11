@@ -1,0 +1,18 @@
+{
+    "name": "Erwic",
+    "icon": "./example-icon.png",
+    "apps": [
+        {
+            "container": "discord",
+            "url": "https://discord.com/app"
+        },
+        {
+            "container": "telegram",
+            "url": "https://web.telegram.org"
+        },
+        {
+            "container": "slack",
+            "url": "https://example.slack.com"
+        }
+    ]
+}
