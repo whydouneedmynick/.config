@@ -1,26 +1,24 @@
-;; Variables
 (defpoll time :interval "5s" `date +'{"h": "%H", "m": "%M"}'`)
 
-(defvar current_workspace_name "1")
+(defvar current_workspace_name "?")
 
 (deflisten notification "$HOME/.config/bin/notifications")
 (defvar notification_reveal false)
 
 (defvar warning_cpu_temp 55)
-(defvar warning_used_mem_perc 60)
+(defvar warning_used_mem_perc 80)
 
 (defpoll volume_percent :interval "1h" `$HOME/.config/eww/scripts/volume current`)
 
-(deflisten mpv_status `tail -f /tmp/mpv-status`)
 (defvar mpv_player_reveal false)
 (defvar mpv_thumbnail_path "")
 (defvar mpv_title "")
 (defvar layout_alert_reveal false)
+(defvar mpv_status "cat /tmp/mpv-controller-state.json")
 
 (defpoll net :interval "10s"
          :initial `0`
-         `nmcli -t -f SIGNAL,ACTIVE device wifi \
-         | awk -F':' '{if($2=="yes")print$1}'`)
+         `nmcli -t -f SIGNAL,ACTIVE device wifi | awk -F':' '{ if ($2=="yes") print $1 }'`)
 
 (defpoll wireguard_vpn :interval "5s"
          :initial ``
@@ -33,13 +31,13 @@
 (defwidget mpv_player []
            (revealer
              :transition "slideleft"
-             :reveal mpv_player_reveal
+             :reveal {mpv_status.is_playing}
              :duration "500ms"
              (box :class "mpv_player" :orientation "h" :space-evenly false :hexpand true :width "20px"
                   (image :path mpv_thumbnail_path :image-height 15)
                   (space)
                   (label
-                    :text mpv_title
+                    :text {mpv_status.entry.title + " - " + mpv_status.entry.author}
                     :limit-width 35)
                   (space))))
 
