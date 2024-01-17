@@ -46,7 +46,7 @@ play() {
 	export -f _fetch_thumbnail_url
 	export -f _play
 
-	xq -rc '.[] | @sh "_play \(.title) \(.author) \(.link)"' < "$playlist_path" | bash
+	xq -rc '.[] | @sh "_play \(.title) \(.author) \(.source)"' < "$playlist_path" | bash
 }
 
 
@@ -60,6 +60,30 @@ _find_all_playlists() {
 
 	echo "$playlists"
 }
+
+_pause() {
+	local reveal
+	reveal=$(eww get mpv_player_reveal)
+
+	if [[ "$reveal" == "true" ]]; then
+		reveal="false"
+	else
+		reveal="true"
+	fi
+
+	eww update mpv_player_reveal="$reveal"
+	mpv-controller toggle-pause
+}
+
+_get_current_volume() {
+	echo '{ "command": ["get_property", "volume"] }' | socat - "$MPV_SOCKET_PATH" | xq '.data'
+}
+
+_set_volume() {
+	local volume="$1"
+	echo "{ \"command\": [\"set_property\", \"volume\", $volume] }" | socat - "$MPV_SOCKET_PATH"
+}
+
 
 pid=$(pgrep -a mpv | rg "$MPV_SOCKET_PATH" | awk '{print $1}')
 
@@ -78,7 +102,7 @@ restart() {
 if [ -n "$pid" ]; then
 	echo "Already playing"
 	menu_opts=("1 next track" "5 previous track" "2 next chapter" "6 previous chapter" "4 choose another" "3 toggle pause")
-	menu_actions=("kill $pid" "notify-send 'Not implemented'" "mpv-controller next-chapter" "mpv-controller prev-chapter" "restart $pid" "mpv-controller toggle-pause")
+	menu_actions=("kill $pid" "notify-send 'Not implemented'" "mpv-controller next-chapter" "mpv-controller prev-chapter" "restart $pid" "_pause")
 	option=$(printf "%s\n" "${menu_opts[@]}" | fuzzel --dmenu --index)
 	
 	${menu_actions[$option]}

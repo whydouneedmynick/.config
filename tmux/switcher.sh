@@ -5,6 +5,7 @@ PROJECTS_BASE_DIR="$HOME/code"
 LIST_SESSIONS="${1:-$HOME/.config/tmux/list_sessions.sh}"
 LIST_PROJECTS="${2:-$HOME/.config/tmux/list_projects.sh}"
 LIST_LAYOUTS="${3:-$HOME/.config/tmux/list_layouts.sh}"
+KILL_SESSION="${3:-$HOME/.config/tmux/kill_session.sh}"
 
 select_session() {
     header="  Switcher
@@ -22,7 +23,7 @@ select_session() {
 	--bind "ctrl-o:change-prompt(   )+reload($LIST_PROJECTS $PROJECTS_BASE_DIR)" \
 	--bind "ctrl-l:change-prompt(   )+reload($LIST_LAYOUTS)" \
 	--bind "ctrl-e:become(echo {q})" \
-	--bind "ctrl-d:reload(tmux kill-session -t {}; $LIST_SESSIONS)+clear-query"
+	--bind "ctrl-d:reload($KILL_SESSION {}; $LIST_SESSIONS)+clear-query"
 }
 
 session_name=$(select_session)
