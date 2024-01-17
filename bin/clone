@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e 
 
-repo_url="$1"
+repo_url="${1:-$(wl-paste)}"
 repo_name=$(basename "$repo_url" | sed 's/\.git//')
 read -r -e -p "Enter directory name (default: $repo_name): " userInput
 dir_name=${userInput:-$repo_name}
