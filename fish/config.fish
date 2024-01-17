@@ -35,6 +35,11 @@ if status is-interactive
     alias d docker
     alias gr 'cd (gitroot.sh)'
     alias rm trash
+
+    function gpt
+        set prompt (string join " " $argv)
+        sgpt --model gpt-3.5-turbo $prompt
+    end
     
     fish_add_path "$HOME/.local/bin/"
     fish_add_path "$HOME/.config/bin/"
