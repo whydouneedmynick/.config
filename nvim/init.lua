@@ -946,9 +946,9 @@ local servers = {
       diagnostics = {
         enable = true,
       },
-      check = {
-        command = 'clippy',
-      }
+      -- check = {
+      --   command = 'clippy',
+      -- }
     }
   }
 }
