@@ -210,18 +210,27 @@ require('lazy').setup({
         TypeParameter = "󰅲",
       }
 
+      local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+      cmp.event:on(
+        'confirm_done',
+        cmp_autopairs.on_confirm_done()
+      )
+
       cmp.setup {
         snippet = {
           expand = function(args)
             luasnip.lsp_expand(args.body)
           end,
         },
+        experimental = {
+          ghost_text = true,
+        },
         mapping = cmp.mapping.preset.insert {
           ['<C-n>'] = cmp.mapping.select_next_item(),
           ['<C-p>'] = cmp.mapping.select_prev_item(),
-          ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
           ['<C-Space>'] = cmp.mapping.complete {},
+          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-f>'] = cmp.mapping.scroll_docs(4),
           ['<CR>'] = cmp.mapping.confirm {
             behavior = cmp.ConfirmBehavior.Replace,
             select = true,
@@ -229,8 +238,8 @@ require('lazy').setup({
           ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
-            elseif luasnip.expand_or_locally_jumpable() then
-              luasnip.expand_or_jump()
+            elseif luasnip.locally_jumpable(1) then
+              luasnip.jump(1)
             else
               fallback()
             end
@@ -248,7 +257,8 @@ require('lazy').setup({
         sources = {
           { name = 'nvim_lsp' },
           { name = 'buffer' },
-          { name = "luasnip" }
+          { name = "luasnip" },
+          { name = "obsidian" }
         },
         formatting = {
           format = function(entry, vim_item)
@@ -283,13 +293,28 @@ require('lazy').setup({
     "folke/noice.nvim",
     event = "VeryLazy",
     opts = {
-      lsp = { progress = { enabled = true, view = 'mini' } },
+      lsp = { progress = { enabled = false } },
       presets = {
         bottom_search = true,         -- use a classic bottom cmdline for search
-        command_palette = true,       -- position the cmdline and popupmenu together
+        command_palette = false,      -- position the cmdline and popupmenu together
         long_message_to_split = true, -- long messages will be sent to a split
         inc_rename = false,           -- enables an input dialog for inc-rename.nvim
         lsp_doc_border = false,       -- add a border to hover docs and signature help
+      },
+      routes = {
+        {
+          filter = {
+            event = 'msg_show',
+            any = {
+              { find = '%d+L, %d+B' },
+              { find = '; after #%d+' },
+              { find = '; before #%d+' },
+              { find = '%d fewer lines' },
+              { find = '%d more lines' },
+            },
+          },
+          opts = { skip = true },
+        }
       },
     },
     dependencies = {
@@ -301,16 +326,11 @@ require('lazy').setup({
       {
         'rcarriga/nvim-notify',
         opts = {
-          render = 'compact',
-          icons = {
-            DEBUG = " ",
-            ERROR = " ",
-            INFO = " ",
-            TRACE = " ✎",
-            WARN = " "
-          },
-          timeout = 1000,
-          stages = 'slide',
+          top_down = false,
+          stages = "slide",
+          render = "wrapped-compact",
+          background_colour = "#000000",
+          enabled = false,
         },
       },
     }
@@ -318,136 +338,21 @@ require('lazy').setup({
   {
     'lambdalisue/suda.vim',
   },
-  -- {
-  --   'rebelot/kanagawa.nvim',
-  --   name = 'kanagawa',
-  --   priority = 1000,
-  --   config = function()
-  --     -- Default options:
-  --     require('kanagawa').setup({
-  --       compile = false,  -- enable compiling the colorscheme
-  --       undercurl = true, -- enable undercurls
-  --       commentStyle = { italic = true },
-  --       functionStyle = {},
-  --       keywordStyle = { italic = true },
-  --       statementStyle = { bold = true },
-  --       typeStyle = {},
-  --       transparent = false,   -- do not set background color
-  --       dimInactive = false,   -- dim inactive window `:h hl-NormalNC`
-  --       terminalColors = true, -- define vim.g.terminal_color_{0,17}
-  --       colors = {             -- add/modify theme and palette colors
-  --         palette = {},
-  --         theme = {
-  --           wave = {},
-  --           lotus = {},
-  --           dragon = {
-  --             ui = {
-  --               float = {
-  --                 bg = "none"
-  --               }
-  --             }
-  --           },
-  --           all = {}
-  --         },
-  --       },
-  --       overrides = function(colors) -- add/modify highlights
-  --         return {}
-  --       end,
-  --       theme = "wave",    -- Load "wave" theme when 'background' option is not set
-  --       background = {     -- map the value of 'background' option to a theme
-  --         dark = "dragon", -- try "dragon" !
-  --         light = "lotus"
-  --       },
-  --     })
-  --
-  --     -- setup must be called before loading
-  --     vim.cmd("colorscheme kanagawa")
-  --   end
-  -- },
-  -- {
-  --   'rose-pine/neovim',
-  --   name = 'rose-pine',
-  --   priority = 1000,
-  --   config = function()
-  --     require('rose-pine').setup({
-  --       --- @usage 'auto'|'main'|'moon'|'dawn'
-  --       variant = 'moon',
-  --       --- @usage 'main'|'moon'|'dawn'
-  --       dark_variant = 'moon',
-  --       bold_vert_split = false,
-  --       dim_nc_background = false,
-  --       disable_background = false,
-  --       disable_float_background = false,
-  --       disable_italics = false,
-  --
-  --       --- @usage string hex value or named color from rosepinetheme.com/palette
-  --       groups = {
-  --         background = 'base',
-  --         background_nc = '_experimental_nc',
-  --         panel = 'surface',
-  --         panel_nc = 'base',
-  --         border = 'highlight_med',
-  --         comment = 'muted',
-  --         link = 'iris',
-  --         punctuation = 'subtle',
-  --
-  --         error = 'love',
-  --         hint = 'iris',
-  --         info = 'foam',
-  --         warn = 'gold',
-  --
-  --         headings = {
-  --           h1 = 'iris',
-  --           h2 = 'foam',
-  --           h3 = 'rose',
-  --           h4 = 'gold',
-  --           h5 = 'pine',
-  --           h6 = 'foam',
-  --         }
-  --         -- or set all headings at once
-  --         -- headings = 'subtle'
-  --       },
-  --
-  --       -- Change specific vim highlight groups
-  --       -- https://github.com/rose-pine/neovim/wiki/Recipes
-  --       highlight_groups = {
-  --         ColorColumn = { bg = 'rose' },
-  --
-  --         -- Blend colours against the "base" background
-  --         CursorLine = { bg = 'foam', blend = 10 },
-  --         StatusLine = { fg = 'love', bg = 'love', blend = 10 },
-  --
-  --         -- By default each group adds to the existing config.
-  --         -- If you only want to set what is written in this config exactly,
-  --         -- you can set the inherit option:
-  --         Search = { bg = 'gold', inherit = false },
-  --       }
-  --     })
-  --
-  --     -- Set colorscheme after options
-  --     vim.cmd.colorscheme 'rose-pine'
-  --   end
-  -- },
   {
     "catppuccin/nvim",
-    name = "catpuccin",
+    name = "catppuccin",
     priority = 1000,
     config = function()
       require("catppuccin").setup({
-        flavour = "frappe",             -- latte, frappe, macchiato, mocha
-        transparent_background = false, -- disables setting the background color.
-        show_end_of_buffer = false,     -- shows the '~' characters after the end of buffers
-        term_colors = true,             -- sets terminal colors (e.g. `g:terminal_color_0`)
-        dim_inactive = {
-          enabled = false,              -- dims the background color of inactive window
-          shade = "dark",
-          percentage = 0.15,            -- percentage of the shade to apply to the inactive window
-        },
-        no_italic = false,              -- Force no italic
-        no_bold = false,                -- Force no bold
-        no_underline = false,           -- Force no underline
-        styles = {                      -- Handles the styles of general hi groups (see `:h highlight-args`):
-          comments = { "italic" },      -- Change the style of comments
+        flavour = "frappe",            -- latte, frappe, macchiato, mocha
+        transparent_background = true, -- disables setting the background color.
+        show_end_of_buffer = false,    -- shows the '~' characters after the end of buffers
+        no_italic = false,             -- Force no italic
+        no_bold = false,               -- Force no bold
+        no_underline = false,          -- Force no underline
+        term_colors = false,
+        styles = {                     -- Handles the styles of general hi groups (see `:h highlight-args`):
+          comments = { "italic" },     -- Change the style of comments
           conditionals = { "italic" },
           loops = {},
           functions = {},
@@ -460,22 +365,78 @@ require('lazy').setup({
           types = {},
           operators = {},
         },
-        color_overrides = {},
+        color_overrides = {
+          oceanic_next = {
+            red = '#EC5F67',
+            yellow = '#FAC863',
+            blue = '#6699CC',
+          }
+        },
         custom_highlights = function(colors)
           return {
-            CursorLine = { bg = colors.base },
-            CursorLineNr = { bg = colors.base, fg = colors.blue },
+            CursorLine = { bg = colors.none },
+            CursorLineNr = { bg = colors.none, fg = colors.blue, bold = true },
+
+            Normal = { bg = colors.none },
+            NormalFloat = { bg = colors.base },
+
+            Pmenu = { bg = colors.base, fg = colors.blue },
+
+            TelescopeBorder = { bg = colors.crust, fg = colors.crust },
+            TelescopePromptBorder = { bg = colors.base, fg = colors.base },
+            TelescopePromptNormal = { bg = colors.base },
+            TelescopePromptPrefix = { bg = colors.base, fg = colors.red },
+            TelescopeNormal = { bg = colors.crust },
+            TelescopePreviewTitle = { bg = colors.base, fg = colors.base },
+            TelescopePromptTitle = { bg = colors.base, fg = colors.base },
+            TelescopeResultsTitle = { bg = colors.crust, fg = colors.crust },
+            TelescopeSelection = { bg = colors.base, fg = colors.white },
+            TelescopeResultsDiffChange = { fg = colors.yellow },
+            TelescopeResultsDiffDelete = { fg = colors.red },
+
+            -- TelescopeTitle = { bg = colors.base },
+            -- TelescopeResultsBorder = { bg = colors.base, fg = colors.base },
+            -- TelescopePreviewBorder = { bg = colors.base, fg = colors.base },
+
+            NoiceCmdline = { bg = colors.crust },
+            NoiceCmdlinePopup = { bg = colors.crust },
+            NoiceCmdlinePopupBorder = { bg = colors.crust, fg = colors.crust },
+
+            NotifyBackground = { bg = colors.crust },
+            NotifyINFOBody = { bg = colors.crust },
+            NotifyINFOTitle = { bg = colors.crust },
+            NotifyINFOBorder = { bg = colors.crust, fg = colors.crust },
+
+            NotifyWARNBody = { bg = colors.crust },
+            NotifyWARNTitle = { bg = colors.crust },
+            NotifyWARNBorder = { bg = colors.crust, fg = colors.crust },
+
+            NotifyERRORBody = { bg = colors.crust },
+            NotifyERRORTitle = { bg = colors.crust },
+            NotifyERRORBorder = { bg = colors.crust, fg = colors.crust },
+
+            NotifyDEBUGBody = { bg = colors.crust },
+            NotifyDEBUGTitle = { bg = colors.crust },
+            NotifyDEBUGBorder = { bg = colors.crust, fg = colors.crust },
+
+            NotifyTRACEBody = { bg = colors.crust },
+            NotifyTRACETitle = { bg = colors.crust },
+            NotifyTRACEBorder = { bg = colors.crust, fg = colors.crust },
+
           }
         end,
         integrations = {
           cmp = true,
           gitsigns = true,
           treesitter = true,
-          notify = true,
+          notify = false,
           harpoon = true,
-          telescope = true,
+          telescope = {
+            enabled = false,
+            style = "nvchad",
+          },
           fidget = true,
-          noice = true,
+          noice = false,
         },
       })
 
@@ -484,25 +445,12 @@ require('lazy').setup({
       vim.opt.cursorline = true
     end
   },
-  -- {
-  --   'projekt0n/github-nvim-theme',
-  --   lazy = false, -- make sure we load this during startup if it is your main colorscheme
-  --   priority = 1000, -- make sure to load this before all the other start plugins
-  --   config = function()
-  --     vim.cmd.colorscheme 'github_dark_dimmed'
-  --   end,
-  -- },
   {
-    -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
-    -- See `:help lualine.txt`
+    dependencies = {
+      'arkav/lualine-lsp-progress',
+    },
     config = function()
-      -- local auto_theme_custom = require('lualine.themes.auto')
-      -- auto_theme_custom.normal.c.bg = 'none'
-      -- auto_theme_custom.visual.c.bg = 'none'
-      -- auto_theme_custom.command.c.bg = 'none'
-      -- auto_theme_custom.insert.c.bg = 'none'
-
       require('lualine').setup({
         sections = {
           lualine_a = {
@@ -546,6 +494,15 @@ require('lazy').setup({
                 info = ' ',
               },
               separator = { left = '', right = '' },
+            },
+            {
+              'lsp_progress',
+              display_components = { 'lsp_client_name', 'spinner' },
+              timer = { progress_enddelay = 50, spinner = 100, lsp_client_name_enddelay = 1000 },
+              separators = {
+                lsp_client_name = { pre = '', post = '' },
+              },
+              spinner_symbols = { '', '', '', '', '', '', '', '', '', '', '', '', '', '' },
             },
           },
           lualine_x = {
@@ -606,6 +563,8 @@ require('lazy').setup({
     config = function()
       require('telescope').setup {
         defaults = {
+          prompt_prefix = '❯ ',
+          selection_caret = '  ',
           mappings = {
             i = {
               ['<C-u>'] = false,
@@ -615,7 +574,25 @@ require('lazy').setup({
         },
         pickers = {
           find_files = {
-            theme = "ivy",
+            wrap_results = true,
+            path_display = function(opts, path)
+              local tail = require("telescope.utils").path_tail(path)
+              return string.format("%s (%s)", tail, path)
+            end,
+            sorting_strategy = "ascending",
+            previewer = false,
+            layout_config = {
+              width = 0.5,
+              height = 0.5,
+              prompt_position = "top",
+            },
+            attach_mappings = function(_, map)
+              map({ "i", "n" }, "<C-r>", function(_prompt_bufnr)
+                local entry = action_state.get_selected_entry()
+                vim.notify(entry)
+              end)
+              return true
+            end
           },
           live_grep = {
             theme = "ivy",
@@ -659,12 +636,16 @@ require('lazy').setup({
       pcall(require('telescope').load_extension, 'harpoon')
       pcall(require('telescope').load_extension, 'git_worktree')
 
+      local function find_files()
+        require('telescope.builtin').find_files()
+      end
+
       vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = 'Find recently opened files' })
       vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
         { desc = 'Fuzzily search in current buffer' })
       vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search git files' })
       vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = 'Search git status' })
-      vim.keymap.set('n', '<leader>f', require('telescope.builtin').find_files, { desc = 'Find files' })
+      vim.keymap.set('n', '<leader>f', find_files, { desc = 'Find files' })
       vim.keymap.set('v', '<leader>f', '"zy:Telescope find_files default_text=<C-R>z<CR>',
         { desc = 'Find file with selected name', silent = true })
       vim.keymap.set('v', '<leader>;', '"zy:Telescope live_grep default_text=<C-R>z<CR>',
@@ -987,5 +968,7 @@ vim.keymap.set('n', '<leader>w', Toggle_wrap, { desc = 'Toggle [W]rap', silent =
 vim.opt.splitright = true;
 vim.opt.guicursor = "";
 vim.opt.conceallevel = 2;
-vim.opt.pumblend = 15
-vim.opt.winblend = 5
+-- vim.opt.pumblend = 15
+-- vim.opt.winblend = 5
+
+vim.opt.fillchars = { eob = " " }

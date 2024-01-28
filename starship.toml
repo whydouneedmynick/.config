@@ -1,5 +1,5 @@
 format = '''
-[┌](black)$character$shell$git_branch$git_status$python$rust$jobs$fill $directory$fill $time
+[┌](black)$character$shell$git_branch$git_status$python$rust$jobs $fill $directory$fill $time
 [└](black) '''
 
 [shell]

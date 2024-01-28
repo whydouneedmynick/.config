@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-# Notification history written here
-killall tiramisu
-
-file="$HOME/.config/waybar/.notifs"
-rm -f "$file"
-
 # How long each line stays on screen
 duration=5
 
@@ -18,10 +12,9 @@ is_notif_complete() {
 	esac
 }
 
-touch "$file"
-tiramisu -s -o '{"source": "#source", "summary": "#summary", "icon": "#icon"}' |
+tiramisu -s -o '{"source": "#source", "summary": "#summary", "icon": "#icon", "timeout": "#timeout"}' |
 	while read -r notif; do
-		app=$(echo "$notif" | jq '.source' | xargs)
+		app=$(echo "$notif" | xq '.source' | xargs)
 
 		case "$app" in
 			"Telegram Desktop") 
@@ -64,8 +57,9 @@ tiramisu -s -o '{"source": "#source", "summary": "#summary", "icon": "#icon"}' |
 		summary=$(echo "$notif" | xq '.summary' | xargs)
 		body="$app $summary"
 
+		eww update notification_text="$body"
+		mpv /usr/share/sounds/freedesktop/stereo/message.oga &
 		eww update notification_reveal=true
-		echo "$body"
 		sleep "$duration"
 		eww update notification_reveal=false
 	done

@@ -1,5 +1,11 @@
-set fish_greeting
+function fish_greeting
+     pokemon-colorscripts -r
+end
 
+function fish_user_key_bindings
+    fish_default_key_bindings -M insert
+    fish_vi_key_bindings --no-erase insert
+end
 
 if status is-interactive
     if test $TERM != 'dumb'
@@ -12,9 +18,6 @@ if status is-interactive
         starship init fish | source
         enable_transience
 
-        fish_default_key_bindings -M insert
-        fish_vi_key_bindings --no-erase insert
-
         nvm use lts 1>/dev/null
     end
 
@@ -25,7 +28,7 @@ if status is-interactive
     alias rm trash
 
     function gpt
-        sgpt --model gpt-3.5-turbo $prompt
+        sgpt --model gpt-3.5-turbo $argv
     end
     
     fish_add_path "$HOME/.local/bin/"
@@ -34,6 +37,7 @@ if status is-interactive
 
     set --export EDITOR nvim
     set --export MANPAGER "nvim +Man!"
+    set --export OPENAI_API_KEY (keyctl pipe 727219199)
 
     set -Ux FZF_DEFAULT_OPTS "\
     --color=bg+:#414559,bg:#303446,spinner:#f2d5cf,hl:#e78284 \

@@ -1,20 +1,25 @@
+; Depends on plyaerctl, mpv-mpris
 (defpoll time :interval "5s" `date +'{"h": "%H", "m": "%M"}'`)
 
 (defvar current_workspace_name "?")
 
-(deflisten notification "$HOME/.config/bin/notifications")
+;; (deflisten notification "$HOME/.config/bin/notifications")
 (defvar notification_reveal false)
+(defvar notification_text "")
 
 (defvar warning_cpu_temp 55)
 (defvar warning_used_mem_perc 80)
 
 (defpoll volume_percent :interval "1h" `$HOME/.config/eww/scripts/volume current`)
 
+(deflisten playing_reveal "while true; do if [[ $(playerctl status) == 'Playing' ]]; then echo t; else echo f; fi; sleep 1; done")
+(deflisten playing_title "while true; do playerctl metadata title; sleep 1; done")
+; (deflisten playing_art "while true; do playerctl metadata mpris:artUrl | sed \'s/file:\/\///; s/$/.png/\'; sleep 1; done")
 (defvar mpv_player_reveal false)
 (defvar mpv_thumbnail_path "")
 (defvar mpv_title "")
 (defvar layout_alert_reveal false)
-(defvar mpv_status "cat /tmp/mpv-controller-state.json")
+(defvar mpv_state "")
 
 (defpoll net :interval "10s"
          :initial `0`
@@ -31,13 +36,13 @@
 (defwidget mpv_player []
            (revealer
              :transition "slideleft"
-             :reveal {mpv_status.is_playing}
+             :reveal {playing_reveal == 't' ? true : false}
              :duration "500ms"
              (box :class "mpv_player" :orientation "h" :space-evenly false :hexpand true :width "20px"
-                  (image :path mpv_thumbnail_path :image-height 15)
+                  ; (image :path playing_art :image-height 15)
                   (space)
                   (label
-                    :text {mpv_status.entry.title + " - " + mpv_status.entry.author}
+                    :text {'  ' + playing_title}
                     :limit-width 35)
                   (space))))
 
@@ -131,7 +136,7 @@
              :duration "500ms"
              (label
                :class "box notification"
-               :text notification
+               :text notification_text
                :limit-width 50
                )))
 
@@ -197,8 +202,7 @@
                        :width "100%"
                        :anchor "top center")
            :monitor 0
-           :stacking "fg"
-           :windowtype "dock"
+           :stacking "bottom"
            :exclusive true
            (bar))
 

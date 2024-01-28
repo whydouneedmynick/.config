@@ -71,3 +71,11 @@ user-dirs.dirs
 user-dirs.locale
 QtProject.conf
 haas-client
+/cava/
+/libreoffice/
+/mako/
+/obsidian/
+/swaync/
+/unity3d/
+/waybar/
+/gtk-3.0/bookmarks
